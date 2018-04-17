@@ -1,4 +1,4 @@
-package com.qi.chat.common.packages;
+package com.qi.chat.common.utils;
 
 /**
  * Created by qi on 2018/4/16.

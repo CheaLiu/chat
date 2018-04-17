@@ -1,6 +1,6 @@
 package com.qi.chat.server;
 
-import com.qi.chat.common.Message;
+import com.qi.chat.common.message.Message;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,65 +18,22 @@ public class ServerManager {
 
     private ServerSocket serverSocket;
     private boolean isClosed;
+    private ExecutorService executorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory());
 
     public void startServer(int port) throws IOException {
-        ExecutorService executorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory());
+
         serverSocket = new ServerSocket(port);
-        serverSocket.setSoTimeout(15 * 1000);
-        while (true) {
-            Socket socket = serverSocket.accept();
-            executorService.execute(new SocketTask(this, socket));
-        }
+        TcpTask tcpTask = new TcpTask(serverSocket);
+        executorService.execute(tcpTask);
     }
 
     public void stopServer() throws IOException {
-        isClosed = true;
         if (serverSocket != null) {
             serverSocket.close();
         }
-    }
-
-    public static class SocketTask implements Runnable {
-
-        private final ServerManager serverManager;
-        private Socket socket;
-
-        public SocketTask(ServerManager serverManager, Socket socket) {
-            this.serverManager = serverManager;
-            this.socket = socket;
-        }
-
-        @Override
-        public void run() {
-            try {
-                if (serverManager.isClosed) {
-                    shutdown();
-                } else {
-                    InputStream inputStream = socket.getInputStream();
-                    Message message = new Message.Builder().build();
-                    message.read(inputStream);
-                    String destination = message.getDestination();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                shutdown();
-            }
-        }
-
-        private void shutdown() {
-            if (socket != null) {
-                try {
-                    if (!socket.isOutputShutdown())
-                        socket.shutdownOutput();
-                    if (!socket.isInputShutdown())
-                        socket.shutdownInput();
-                    if (!socket.isClosed())
-                        socket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        Socket socket;
+        while ((socket = SocketPool.getSocketPool().poll()) != null) {
+            socket.close();
         }
     }
 }
