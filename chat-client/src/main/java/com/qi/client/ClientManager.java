@@ -1,9 +1,11 @@
 package com.qi.client;
 
+import com.qi.chat.common.Message;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
+import java.net.*;
 import java.nio.channels.SocketChannel;
 
 /**
@@ -13,34 +15,23 @@ import java.nio.channels.SocketChannel;
  */
 public class ClientManager {
 
-    private Socket socket;
 
-    public void connect(String host, int port) throws IOException {
-        socket = new Socket(host, port);
-        socket.setSoTimeout(15 * 1000);
-        SocketChannel channel = socket.getChannel();
+    private DatagramSocket socket;
+    private String serverHost;
+    private int port;
+    private Message.Builder messageBuilder;
+
+    public void connect(String serverHost, int port) throws Exception {
+        socket = new DatagramSocket();
+        messageBuilder = new Message.Builder()
+                .setSource(Inet4Address.getLocalHost().getHostAddress() + ":" + socket.getPort())
+                .setDestination(serverHost + ":" + port);
     }
 
-    public void read() throws IOException {
-        InputStream inputStream = socket.getInputStream();
+    public void send(String msg) throws Exception {
+        Message message = messageBuilder.setBody(msg).build();
+
+        DatagramPacket datagramPacket = new DatagramPacket();
     }
 
-    public void write() throws IOException {
-        OutputStream outputStream = socket.getOutputStream();
-    }
-
-    public void close() {
-        if (socket != null) {
-            try {
-                if (!socket.isOutputShutdown())
-                    socket.shutdownOutput();
-                if (!socket.isInputShutdown())
-                    socket.shutdownInput();
-                if (!socket.isClosed())
-                    socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 }

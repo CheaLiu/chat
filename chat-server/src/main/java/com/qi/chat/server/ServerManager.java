@@ -1,13 +1,13 @@
-package com.qi.server;
+package com.qi.chat.server;
+
+import com.qi.chat.common.Message;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 /**
  * Creator  liuqi
@@ -53,6 +53,9 @@ public class ServerManager {
                     shutdown();
                 } else {
                     InputStream inputStream = socket.getInputStream();
+                    Message message = new Message.Builder().build();
+                    message.read(inputStream);
+                    String destination = message.getDestination();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
