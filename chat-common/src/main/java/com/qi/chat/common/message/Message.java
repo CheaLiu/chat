@@ -3,6 +3,7 @@ package com.qi.chat.common.message;
 import com.qi.chat.common.utils.Array2NumberConvertor;
 import com.qi.chat.common.utils.ArrayUtil;
 import com.qi.chat.common.utils.TextUtil;
+import com.sun.xml.internal.ws.server.sei.MessageFiller;
 
 import java.io.InputStream;
 
@@ -19,62 +20,90 @@ public class Message {
     public final static int EXTENSION_NAME_LENGTH = 10;
     public final static int MESSAGE_SIZE_LENGTH = 4;
 
-    /**
-     * 发送者信息
-     */
-    protected String source;
-    /**
-     * 接收者信息
-     */
-    protected String destination;
+    Header header;
 
-    protected int srcPort;
+    public static class Header {
 
-    protected int desPort;
-    /**
-     * 文件长度
-     */
-    protected int messageSize;
-    /**
-     * 消息类型
-     */
-    protected MessageType messageType;
+        /**
+         * 发送者信息
+         */
+        protected String source;
+        /**
+         * 接收者信息
+         */
+        protected String destination;
+
+        protected int srcPort;
+
+        protected int desPort;
+        /**
+         * 文件长度
+         */
+        protected int messageSize;
+        /**
+         * 消息类型
+         */
+        protected MessageType messageType;
+
+
+        /**
+         * 文件名
+         */
+        protected String fileName;
+        /**
+         * 文件扩展名
+         */
+        protected String extensionName;
+
+
+        public Header(String source, int srcPort, String destination, int desPort) throws Exception {
+            if (TextUtil.isEmptyOrNull(source) || TextUtil.isEmptyOrNull(destination)) {
+                throw new Exception("地址不明确");
+            }
+            if (messageType == null) throw new Exception("设置消息类型");
+            this.source = source;
+            this.destination = destination;
+            this.srcPort = srcPort;
+            this.desPort = desPort;
+        }
+
+        public Header(String src, int srcPort, String des, int desPort, MessageType messageType, String fileName, String extenceName, int messageSize) throws Exception {
+            this(src, srcPort, des, desPort);
+            this.messageType = messageType;
+            this.fileName = fileName;
+            this.extensionName = extenceName;
+            this.messageSize = messageSize;
+        }
+    }
 
 
     public void setHeader(String source, int srcPort, String destination, int desPort) throws Exception {
-        if (TextUtil.isEmptyOrNull(source) || TextUtil.isEmptyOrNull(destination)) {
-            throw new Exception("地址不明确");
-        }
-        if (messageType == null) throw new Exception("设置消息类型");
-        this.source = source;
-        this.destination = destination;
-        this.srcPort = srcPort;
-        this.desPort = desPort;
+        header = new Header(source, srcPort, destination, desPort);
     }
 
 
     public String getSource() {
-        return source;
+        return header.source;
     }
 
     public String getDestination() {
-        return destination;
+        return header.destination;
     }
 
     public int getSrcPort() {
-        return srcPort;
+        return header.srcPort;
     }
 
     public int getDesPort() {
-        return desPort;
+        return header.desPort;
     }
 
     public int getMessageSize() {
-        return messageSize;
+        return header.messageSize;
     }
 
     public MessageType getMessageType() {
-        return messageType;
+        return header.messageType;
     }
 
     public enum MessageType {

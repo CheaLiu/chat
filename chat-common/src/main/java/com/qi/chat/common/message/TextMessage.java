@@ -3,8 +3,6 @@ package com.qi.chat.common.message;
 import com.qi.chat.common.utils.Array2NumberConvertor;
 import com.qi.chat.common.utils.ArrayUtil;
 
-import java.io.IOException;
-
 /**
  * Created by qi on 2018/4/16.
  */
@@ -12,10 +10,10 @@ public class TextMessage extends Message {
     /**
      * 文本消息
      */
-    private String msg;
+    private byte[] body;
 
-    public TextMessage(){
-        this.messageType = MessageType.TEXT;
+    public TextMessage() {
+        header.messageType = MessageType.TEXT;
     }
 
     /**
@@ -25,22 +23,25 @@ public class TextMessage extends Message {
      * @throws Exception
      */
     public byte[] getHeader() throws Exception {
-        byte[] sourceBytes = createBytes(source.getBytes(), SOURCE_LENGHT);
-        byte[] srcPortBytes = Array2NumberConvertor.intToByte4(srcPort);
-        byte[] desBytes = createBytes(destination.getBytes(), DESTINATION_LENGTH);
-        byte[] desPortBytes = Array2NumberConvertor.intToByte4(desPort);
-        byte[] messageTypeBytes = Array2NumberConvertor.intToByte4(messageType.type);
-        byte[] msgSizeBytes = Array2NumberConvertor.intToByte4(messageSize);
+        byte[] sourceBytes = ArrayUtil.extendBytes(header.source.getBytes(), SOURCE_LENGHT);
+        byte[] srcPortBytes = Array2NumberConvertor.intToByte4(header.srcPort);
+        byte[] desBytes = ArrayUtil.extendBytes(header.destination.getBytes(), DESTINATION_LENGTH);
+        byte[] desPortBytes = Array2NumberConvertor.intToByte4(header.desPort);
+        byte[] messageTypeBytes = Array2NumberConvertor.intToByte4(header.messageType.type);
+        byte[] msgSizeBytes = Array2NumberConvertor.intToByte4(header.messageSize);
         return ArrayUtil.combineArray(sourceBytes, srcPortBytes, desBytes, desPortBytes, messageTypeBytes, msgSizeBytes);
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
-        this.messageSize = msg.getBytes().length;
+    public void setBody(byte[] body) {
+        header.messageSize = body.length;
+        this.body = body;
     }
 
-    public String getMsg() throws IOException {
-        return msg;
+    public byte[] getBody() {
+        return body;
     }
 
+    public byte[] getMessage() throws Exception {
+        return ArrayUtil.combineArray(getHeader(), getBody());
+    }
 }

@@ -12,21 +12,15 @@ import java.io.InputStream;
  * Class    com.qi.chat.common.message.StreamMessage
  */
 public class StreamMessage extends Message {
+
+
     /**
      * inputStream
      */
     private InputStream message;
-    /**
-     * 文件名
-     */
-    protected String fileName;
-    /**
-     * 文件扩展名
-     */
-    protected String extensionName;
 
     public StreamMessage() {
-        messageType = MessageType.STREAM;
+        header.messageType = MessageType.STREAM;
     }
 
     /**
@@ -36,21 +30,21 @@ public class StreamMessage extends Message {
      * @throws Exception
      */
     public byte[] getHeader() throws Exception {
-        byte[] sourceBytes = createBytes(TextUtil.getNotNullString(source).getBytes(), SOURCE_LENGHT);
-        byte[] srcPortBytes = Array2NumberConvertor.intToByte4(srcPort);
-        byte[] desBytes = createBytes(TextUtil.getNotNullString(destination).getBytes(), DESTINATION_LENGTH);
-        byte[] desPortBytes = Array2NumberConvertor.intToByte4(desPort);
-        byte[] messageTypeBytes = Array2NumberConvertor.intToByte4(messageType.type);
-        byte[] fileNameBytes = createBytes(TextUtil.getNotNullString(fileName).getBytes(), FILE_NAME_LENGTH);
-        byte[] extenceNameBytes = createBytes(TextUtil.getNotNullString(extensionName).getBytes(), EXTENSION_NAME_LENGTH);
-        byte[] msgSizeBytes = Array2NumberConvertor.intToByte4(messageSize);
+        byte[] sourceBytes = ArrayUtil.extendBytes(TextUtil.getNotNullString(header.source).getBytes(), SOURCE_LENGHT);
+        byte[] srcPortBytes = Array2NumberConvertor.intToByte4(header.srcPort);
+        byte[] desBytes = ArrayUtil.extendBytes(TextUtil.getNotNullString(header.destination).getBytes(), DESTINATION_LENGTH);
+        byte[] desPortBytes = Array2NumberConvertor.intToByte4(header.desPort);
+        byte[] messageTypeBytes = Array2NumberConvertor.intToByte4(header.messageType.type);
+        byte[] fileNameBytes = ArrayUtil.extendBytes(TextUtil.getNotNullString(header.fileName).getBytes(), FILE_NAME_LENGTH);
+        byte[] extenceNameBytes = ArrayUtil.extendBytes(TextUtil.getNotNullString(header.extensionName).getBytes(), EXTENSION_NAME_LENGTH);
+        byte[] msgSizeBytes = Array2NumberConvertor.intToByte4(header.messageSize);
         return ArrayUtil.combineArray(sourceBytes, srcPortBytes, desBytes, desPortBytes, messageTypeBytes, fileNameBytes, extenceNameBytes, msgSizeBytes);
     }
 
     public void setBody(String fileName, String extensionName, int length, InputStream inputStream) {
-        this.fileName = fileName;
-        this.extensionName = extensionName;
-        this.messageSize = length;
+        header.fileName = fileName;
+        header.extensionName = extensionName;
+        header.messageSize = length;
         this.message = inputStream;
     }
 
@@ -59,11 +53,11 @@ public class StreamMessage extends Message {
     }
 
     public String getFileName() {
-        return fileName;
+        return header.fileName;
     }
 
     public String getExtensionName() {
-        return extensionName;
+        return header.extensionName;
     }
 
 }

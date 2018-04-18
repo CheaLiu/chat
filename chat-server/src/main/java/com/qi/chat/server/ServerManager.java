@@ -1,9 +1,6 @@
 package com.qi.chat.server;
 
-import com.qi.chat.common.message.Message;
-
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -21,7 +18,6 @@ public class ServerManager {
     private ExecutorService executorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory());
 
     public void startServer(int port) throws IOException {
-
         serverSocket = new ServerSocket(port);
         TcpTask tcpTask = new TcpTask(serverSocket);
         executorService.execute(tcpTask);
