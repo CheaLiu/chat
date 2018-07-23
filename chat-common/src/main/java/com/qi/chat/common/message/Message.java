@@ -1,11 +1,6 @@
 package com.qi.chat.common.message;
 
-import com.qi.chat.common.utils.Array2NumberConvertor;
-import com.qi.chat.common.utils.ArrayUtil;
 import com.qi.chat.common.utils.TextUtil;
-import com.sun.xml.internal.ws.server.sei.MessageFiller;
-
-import java.io.InputStream;
 
 /**
  * 消息封装类 source + port + destination + port + messageType + [fileName + extensionName] + messageSize + message
@@ -45,7 +40,6 @@ public class Message {
          */
         protected MessageType messageType;
 
-
         /**
          * 文件名
          */
@@ -55,20 +49,15 @@ public class Message {
          */
         protected String extensionName;
 
-
-        public Header(String source, int srcPort, String destination, int desPort) throws Exception {
+        public Header(String src, int srcPort, String des, int desPort, MessageType messageType, String fileName, String extenceName, int messageSize) throws Exception {
             if (TextUtil.isEmptyOrNull(source) || TextUtil.isEmptyOrNull(destination)) {
                 throw new Exception("地址不明确");
             }
             if (messageType == null) throw new Exception("设置消息类型");
-            this.source = source;
-            this.destination = destination;
+            this.source = src;
+            this.destination = des;
             this.srcPort = srcPort;
             this.desPort = desPort;
-        }
-
-        public Header(String src, int srcPort, String des, int desPort, MessageType messageType, String fileName, String extenceName, int messageSize) throws Exception {
-            this(src, srcPort, des, desPort);
             this.messageType = messageType;
             this.fileName = fileName;
             this.extensionName = extenceName;
@@ -77,10 +66,14 @@ public class Message {
     }
 
 
-    public void setHeader(String source, int srcPort, String destination, int desPort) throws Exception {
-        header = new Header(source, srcPort, destination, desPort);
+    public void setHeader(String source, int srcPort, String destination, int desPort, MessageType messageType, String fileName, String extenceName, int messageSize) throws Exception {
+        header = new Header(source, srcPort, destination, desPort, messageType, fileName, extenceName, messageSize);
     }
 
+
+    public int getHeaderSize() {
+        return SOURCE_LENGHT + PORT_LENGTH + DESTINATION_LENGTH + PORT_LENGTH + MESSAGE_TYPE_LENGTH + (getMessageType() == MessageType.TEXT ? 0 : FILE_NAME_LENGTH + EXTENSION_NAME_LENGTH) + MESSAGE_SIZE_LENGTH;
+    }
 
     public String getSource() {
         return header.source;

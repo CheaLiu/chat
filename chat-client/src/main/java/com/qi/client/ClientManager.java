@@ -8,7 +8,6 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.net.*;
 
 /**
@@ -19,8 +18,6 @@ import java.net.*;
 public class ClientManager {
 
     private DatagramSocket socket;
-    private String serverHost;
-    private int port;
 
     public ClientManager() throws SocketException {
         this(0);
@@ -41,12 +38,17 @@ public class ClientManager {
             do {
                 DatagramPacket datagramPacket = new DatagramPacket(buff, 0, buff.length);
                 socket.receive(datagramPacket);
+                Message.MessageType messageType = null;
+                int bodySize = 0;
                 if (datagramPacket.getLength() > 0) {
                     if (new String(buff, 0, datagramPacket.getLength()).equals(""))
                         data = ArrayUtil.combineArray(data, ArrayUtil.subBytes(buff, 0, datagramPacket.getLength()));
                     if (data.length == Message.SOURCE_LENGHT + Message.PORT_LENGTH + Message.DESTINATION_LENGTH + Message.PORT_LENGTH + Message.MESSAGE_TYPE_LENGTH) {
-                        Message.MessageType messageType = MessageParse.parseType(data);
+                        messageType = MessageParse.parseType(data);
                     }
+                    if (messageType == Message.MessageType.TEXT && data.length == MessageParse.parseHeaderSize(data)) {
+                        bodySize = MessageParse.parseBodySize(data);
+                    }else if ()
                     if (datagramPacket.getLength() < buff.length) {
                         emitter.onNext(MessageParse.parse(new ByteArrayInputStream(data)));
                     }
@@ -71,6 +73,14 @@ public class ClientManager {
 
     public int getRemotePort() {
         return socket.getPort();
+    }
+
+    public String getLocalHostName() {
+        return socket.getLocalAddress().getHostName();
+    }
+
+    public int getLocalPort() {
+        return socket.getLocalPort();
     }
 
 }
